@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Hotel Fantastique</title>
+		<link rel="stylesheet" href="css.css" />
+		<!--[if lt IE 9]>
+		<script>
+			document.createElement('header');
+			document.createElement('nav');
+			document.createElement('section');
+			document.createElement('article');
+			document.createElement('aside');
+			document.createElement('footer');
+		</script>
+		<![endif]-->
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	</head>
+	
+	<body>
+		<div id="hotelInfo">
+			<header class="header" data-bind="with:basicHotelInfo">
+				<h1 class="hotel_name">
+					<span data-bind="text:name"></span>
+					<span class="stars">
+						<!-- ko foreach: new Array(stars) -->
+							<!-- ko text: '★' -->
+							<!-- /ko -->
+						<!-- /ko -->
+					</span>
+				</h1>
+				<address class="hotel_address" data-bind="text:address"></address>
+			</header>
+			
+			<section class="photos">
+				<ul>
+				<!-- ko foreach: photos -->
+					<li class="one_photo" ><a data-bind="attr: { href: large }"><img data-bind="attr: { src: thumb, alt: description }" /></a></li>
+				<!-- /ko -->
+				</ul>
+			</section>
+			
+			<section class="description">
+				<h2>Description</h2>
+				<!-- ko foreach: description -->
+					<p data-bind="text: $data"></p>
+				<!-- /ko -->
+			</section>
+			
+			<section class="facilities">
+				<h2>Facilities</h2>
+				<ul>
+				<!-- ko foreach: facilities -->
+					<li data-bind="text: $data"></li>
+				<!-- /ko -->
+				</ul>
+			</section>
+			
+			<section class="rooms">
+				<h2>Select Your Room</h2>
+				<form method="post" action="" class="rooms_table_form">
+					<table class="rooms_table" cellspacing="0" cellpadding="0">
+						<thead>
+							<tr>
+								<th class="room_name">Room Name</th>
+								<th class="room_occupancy">Occupancy</th>
+								<th class="room_price">Price per Room</th>
+								<th class="room_quantity">No. Rooms</th>
+							</tr>
+						</thead>
+						<tbody>
+						<!-- ko foreach:rooms -->
+							<tr class="one_room">
+								<td class="room_name" data-bind="text:name"></td>
+								<td class="room_occupancy" data-bind="text:occupancy"></td>
+								<td class="room_price" data-bind="text:currencySymbol+price"></td>
+								<td class="room_quantity">
+ 									<select name="room[basic2]"  data-bind="options: getNumRoomsOptions()">
+									</select>
+								</td>
+							</tr>
+						<!-- /ko -->
+						</tbody>
+						<tfoot>
+							<tr>
+								<td colspan="4">
+									<button class="button" type="submit">Book Now</button>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</form>
+			</section>
+		</div>
+
+		<section class="reviews">
+			<h2>Reviews</h2>
+			<div id="reviews_section">
+				<ul class="reviews_list">
+				<!-- ko foreach:reviews -->
+					<li class="one_review">
+						<strong class="review_score" data-bind="text:score"></strong>
+						<blockquote class="review_content" data-bind="html:getReviewHtmlStr()">
+						</blockquote>
+					</li>	
+				<!-- /ko -->
+				</ul>
+			</div>
+			<nav id="reviews_pagination">
+			</nav>
+		</section>
+		
+		<section class="footer">
+			&copy;2014 Booking.com
+		</section>
+		
+		<script src="jquery-1.11.1.min.js"></script>
+		<script src="knockout-3.3.0.min.js"></script>
+		<script src="underscore-1.8.3.min.js"></script>
+		<script src="js.js"></script>
+	</body>
+</html>
