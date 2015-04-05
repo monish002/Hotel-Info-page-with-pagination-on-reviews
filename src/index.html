@@ -106,6 +106,14 @@
 				</ul>
 			</div>
 			<nav id="reviews_pagination">
+				<!-- ko foreach:pageNumbers()  -->
+				<!-- ko if:getSelectedPage() != $data  -->
+					<span data-bind="text: $data, click: setPage"></span>
+				<!-- /ko -->
+				<!-- ko if:getSelectedPage() == $data  -->
+					<span data-bind="text: $data, style: {weight: bold}"></span>
+				<!-- /ko -->
+				<!-- /ko -->
 			</nav>
 		</section>
 		
