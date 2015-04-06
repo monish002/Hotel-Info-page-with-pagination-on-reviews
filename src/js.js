@@ -17,7 +17,7 @@ $(function(){
 // PubSub module to publish and subscribe events.
 // This is used for modules - ReviewsModule and PaginationModule.
 // PaginationModule publishes an event whenever user clicks on another page number.
-(function(ns){
+(function(ns, global){
 
 	var PubSub = function(){};
 	
@@ -35,7 +35,9 @@ $(function(){
 		function publish(eventName, data){
 			if($.isArray(register.eventName)){
 				_.each(register.eventName, function(elem){
-					elem.callback.apply(elem.context, [data]);
+					global.setTimeout(function(){
+						elem.callback.apply(elem.context, [data]);
+					}, 0);
 				});
 			}
 		}
@@ -46,7 +48,7 @@ $(function(){
 	})();
 
 	ns.pubSub = new PubSub();
-})(app.extensions);
+})(app.extensions, window);
 
 // Proposed JSON structure from API
 // Repository module that takes care of fetching data from data source
@@ -105,11 +107,23 @@ $(function(){
 				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
 				cite: 'Malcolm Reynolds'
 			},{
+				score: 5,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 5,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 1,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
 				score: 8,
 				content: 'Duis ac nisi id lorem rhoncus tempus eu sit amet nisi. Aenean ultrices congue ligula, ac molestie velit ultricies a. Nulla ac nunc et nisi placerat interdum sit amet ut erat. Integer vulputate nulla id orci cursus, eget ullamcorper justo ultricies. Nulla lorem dui, euismod non porttitor eu, sagittis in lacus. In suscipit lectus non viverra luctus. Pellentesque egestas, dolor at luctus eleifend, velit dui viverra risus, ac rutrum sapien ante at massa. Donec imperdiet consequat laoreet.',
 				cite: 'Zoe Washburne'
 			}],
-			reviewCount: 25
+			reviewsTotalCount: 25
 		});
 	};
 	
@@ -128,17 +142,20 @@ $(function(){
 		}
 
 		// mocked API response
-		var stubReview = {
-			score: 5,
-			content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
-			cite: 'Malcolm Reynolds'
+		var stubReview = function(){
+			return {
+				score: Math.floor(Math.random()),
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			};
 		};
-		var stubbedReviews = [options.take];
-		_.each(stubbedReviews, function(){
-			stubbedReviews.push(stubReview);
+
+		var stubbedReviews = [];
+		_.each(new Array(options.take), function(){
+			stubbedReviews.push(stubReview());
 		});
 		return $.when(stubbedReviews);
-	}	
+	};
 	
 	ns.repository = {
 		getHotelInfo: getHotelInfo,
@@ -186,23 +203,41 @@ $(function(){
 })(app.models, _);
 
 // Hotel info model
-(function(ns, repo, models, factories){
+(function(ns, repo, models, factories, consts){
 	var HotelInfoModel = function(hotelInfo){
-		var keys = ['basicHotelInfo', 'description', 'photos', 'facilities', 'reviewCount'];
+		var keys = ['basicHotelInfo', 'description', 'photos', 'facilities', 'reviewsTotalCount'];
 		_.extend(this, _.chain(hotelInfo).pick(keys).value());
 	
 		this.rooms = !$.isArray(hotelInfo.rooms) ? [] : _.map(hotelInfo.rooms, function(rawRoom){
 			return new models.Room(rawRoom);
 		});
 		
-		var rawReviews = !$.isArray(hotelInfo.reviews) ? [] : _.map(hotelInfo.reviews, function(rawReview){
+		var reviews = !$.isArray(hotelInfo.reviews) ? [] : _.map(hotelInfo.reviews, function(rawReview){
 			return new models.Review(rawReview);
 		});
-		this.reviews = ko.observableArray(rawReviews);
+		this.reviews = ko.observableArray(reviews);
 	};
 	
-	var updateReviews = function(reviews){
-		this.reviews(reviews);
+	// todo: move to proto
+	var updateReviews = function(hotelId, pageNum){
+		var self = this;
+		repo.getReviews(hotelId, {
+			skip: pageNum * consts.reviewBlockSize,
+			take: consts.reviewBlockSize
+		}).then(
+			// success callback
+			function(rawReviews){
+				var reviews = !$.isArray(rawReviews) ? [] : _.map(rawReviews, function(rawReview){
+					return new models.Review(rawReview);
+				});
+				self.reviews(reviews); // Make reviewsPage class and add set(pageContents)
+			},
+			// error callback
+			function(){ 
+				throw "API call failed";
+				// Log the error with details in server side.
+				// Show appropriate error to user
+			});
 	};
 	
 	HotelInfoModel.prototype = (function(){
@@ -214,10 +249,10 @@ $(function(){
 	ns.HotelInfoModel = HotelInfoModel;
 
 	factories.hotelInfo = (function(){
-		var hotelInfoModel;
+		var self = this;
 		var getInstance = function(hotelId, callback, context){
-			if(hotelInfoModel && hotelInfoModel.basicHotelInfo && hotelInfoModel.basicHotelInfo.id === hotelId){
-				callback(hotelInfoModel);
+			if(self.hotelInfoModel && self.hotelInfoModel.basicHotelInfo && self.hotelInfoModel.basicHotelInfo.id === hotelId){
+				callback(self.hotelInfoModel);
 			}
 			repo.getHotelInfo(hotelId).then(
 				// success callback
@@ -238,40 +273,39 @@ $(function(){
 		};
 	})();
 
-})(app.models, app.repository, app.models, app.factories);
+})(app.models, app.repository, app.models, app.factories, app.constants);
 
 // Pagination model
-(function(ns, _, factories, models){
+(function(ns, _, factories, models, extensions){
 	function Pagination(pageCount){
-		this.selectedPageNumber = 1;
+		this.selectedPageNumber = ko.observable(1);
 		this.pageCount = pageCount;
 	};
 	
 	Pagination.prototype = (function(){
 		var getSelectedPage = function(){
-			return this.selectedPageNumber;
+			return this.selectedPageNumber();
 		};
 		var setSelectedPage = function(pageNum){
-			pubSub.publish('reviews_page_change', {
-				newValue: pageNum,
-				oldValue: this.selectedPageNumber
+			extensions.pubSub.publish('reviews_page_change', {
+				newValue: pageNum
 			});
-			this.selectedPageNumber = pageNum;
+			this.selectedPageNumber(pageNum);
 		};
 		var pageNumbers = function(){
-			return _.range(this.pageCount);
+			return _.range(1, this.pageCount + 1);
 		};
 		return {
 			getSelectedPage: getSelectedPage,
-			setPage: setSelectedPage,
+			setSelectedPage: setSelectedPage,
 			pageNumbers: pageNumbers
 		};
 	})();
 	
 	factories.paginationModel = (function(){
-		var getInstance = function(){
+		var getInstance = function(pageCount){
 			if(!this.pagiModel){
-				this.pagiModel = new models.Pagination(20);
+				this.pagiModel = new models.Pagination(pageCount);
 			}
 			return this.pagiModel;
 		};
@@ -281,7 +315,7 @@ $(function(){
 	})();
 	
 	ns.Pagination = Pagination;
-})(app.models, _, app.factories, app.models);
+})(app.models, _, app.factories, app.models, app.extensions);
 
 // Hotel info module to manage hotel related content (this exclues reviews)
 (function(ns, repo, $, factories){
@@ -293,6 +327,7 @@ $(function(){
 
 		factories.hotelInfo.getInstance(hotelId, function(hotelInfoModel){
 			ko.applyBindings(hotelInfoModel, $('#hotelInfo')[0]);
+			ko.applyBindings(hotelInfoModel, $('#pageTitle')[0]);
 		});
 	};
 	
@@ -310,11 +345,11 @@ $(function(){
 		var hotelId = 123; 
 
 		factories.hotelInfo.getInstance(hotelId, function(hotelInfoModel){
-			hotelInfoModel.updateReviews(pageNumbers.newValue);
+			hotelInfoModel.updateReviews(hotelId, pageNumbers.newValue);
 		});
 	};
 	var init = function(){
-		pubSub.subscribe('reviews_page_changed', updateReviews);
+		pubSub.subscribe('reviews_page_change', updateReviews);
 
 		// TODO: get hotelId from URL. 
 		// For now, setting it to 123 as mock hotel id.
@@ -330,12 +365,19 @@ $(function(){
 })(app.modules, app.repository, $, app.models.Review, app.extensions.pubSub, app.factories);
 
 // pagination module
-(function(ns, repo, $, factories){
+(function(ns, repo, $, factories, consts){
 	var init = function(){
-		//ko.applyBindings(factories.paginationModel.getInstance(), $('reviews_pagination')[0]);
+		// TODO: get hotelId from URL. 
+		// For now, setting it to 123 as mock hotel id.
+		var hotelId = 123; 
+
+		factories.hotelInfo.getInstance(hotelId, function(hotelInfoModel){
+			var pageCount = Math.floor((hotelInfoModel.reviewsTotalCount + consts.reviewBlockSize - 1)/consts.reviewBlockSize);
+			ko.applyBindings(factories.paginationModel.getInstance(pageCount), $('#reviews_pagination')[0]);
+		});
 	};
 	
 	ns.paginationModule = {
 		init: init
 	};
-})(app.modules, app.repository, $, app.factories);
+})(app.modules, app.repository, $, app.factories, app.constants);

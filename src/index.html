@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Hotel Fantastique</title>
+		<title id="pageTitle" data-bind="text: basicHotelInfo.name"></title>
 		<link rel="stylesheet" href="css.css" />
 		<!--[if lt IE 9]>
 		<script>
@@ -21,37 +21,28 @@
 			<header class="header" data-bind="with:basicHotelInfo">
 				<h1 class="hotel_name">
 					<span data-bind="text:name"></span>
-					<span class="stars">
-						<!-- ko foreach: new Array(stars) -->
-							<!-- ko text: '★' -->
-							<!-- /ko -->
-						<!-- /ko -->
-					</span>
+					<span class="stars" data-bind="foreach:new Array(stars)">★</span>
 				</h1>
 				<address class="hotel_address" data-bind="text:address"></address>
 			</header>
 			
 			<section class="photos">
-				<ul>
-				<!-- ko foreach: photos -->
+				<ul data-bind="foreach:photos">
 					<li class="one_photo" ><a data-bind="attr: { href: large }"><img data-bind="attr: { src: thumb, alt: description }" /></a></li>
-				<!-- /ko -->
 				</ul>
 			</section>
 			
 			<section class="description">
 				<h2>Description</h2>
 				<!-- ko foreach: description -->
-					<p data-bind="text: $data"></p>
+				<p data-bind="text: $data"></p>
 				<!-- /ko -->
 			</section>
 			
 			<section class="facilities">
 				<h2>Facilities</h2>
-				<ul>
-				<!-- ko foreach: facilities -->
+				<ul data-bind="foreach:facilities">
 					<li data-bind="text: $data"></li>
-				<!-- /ko -->
 				</ul>
 			</section>
 			
@@ -67,8 +58,7 @@
 								<th class="room_quantity">No. Rooms</th>
 							</tr>
 						</thead>
-						<tbody>
-						<!-- ko foreach:rooms -->
+						<tbody data-bind="foreach:rooms">
 							<tr class="one_room">
 								<td class="room_name" data-bind="text:name"></td>
 								<td class="room_occupancy" data-bind="text:occupancy"></td>
@@ -78,7 +68,6 @@
 									</select>
 								</td>
 							</tr>
-						<!-- /ko -->
 						</tbody>
 						<tfoot>
 							<tr>
@@ -95,24 +84,20 @@
 		<section class="reviews">
 			<h2>Reviews</h2>
 			<div id="reviews_section">
-				<ul class="reviews_list">
-				<!-- ko foreach:reviews -->
+				<ul class="reviews_list" data-bind="foreach:reviews()">
 					<li class="one_review">
 						<strong class="review_score" data-bind="text:score"></strong>
 						<blockquote class="review_content" data-bind="html:getReviewHtmlStr()">
 						</blockquote>
 					</li>	
-				<!-- /ko -->
 				</ul>
 			</div>
-			<nav id="reviews_pagination">
-				<!-- ko foreach:pageNumbers()  -->
-				<!-- ko if:getSelectedPage() != $data  -->
-					<span data-bind="text: $data, click: setPage"></span>
+			<nav id="reviews_pagination" data-bind="foreach:pageNumbers()">
+				<!-- ko if:($root.getSelectedPage() != $data) -->
+					<span data-bind="text: $data, click: $root.setSelectedPage.bind($root)"></span>
 				<!-- /ko -->
-				<!-- ko if:getSelectedPage() == $data  -->
-					<span data-bind="text: $data, style: {weight: bold}"></span>
-				<!-- /ko -->
+				<!-- ko if:($root.getSelectedPage() == $data) -->
+					<span data-bind="text: $data, style: {fontWeight: 'bold'}"></span>
 				<!-- /ko -->
 			</nav>
 		</section>
