@@ -78,31 +78,54 @@
 })(app.modules, app.repository, $, app.models.Review, app.extensions.getPubSubRef(), app.factories, app.eventsList, app.constants);
 
 // Pagination module
-(function(ns, repo, $, factories, consts){
+(function(ns, repo, $, factories, consts, pubSub, eventsList){
 	var PaginationModule = function(){
 		if(!(this instanceof PaginationModule)){
 			return new PaginationModule();
 		}
 		
+		this.selectedPageNumber = ko.observable(consts.INITIAL_REVIEWS_PAGE_NO);
+		this.pageCount = null; // will be set in the init()
+		
 		// TODO: get hotelId from URL. 
 		// For now, setting it to 123 as mock hotel id.
-		this.hotelId = 123; 
+		this.hotelId = 123;	
 	};
 	
 	PaginationModule.prototype = (function(){
 		var init = function(){
+			var self = this;
 			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
-				var pageCount = Math.floor((hotelInfoModel.reviewsTotalCount + consts.REVIEWS_PER_PAGE - 1)/consts.REVIEWS_PER_PAGE);
-				ko.applyBindings(factories.paginationModel.getInstance(pageCount), $('#reviews_pagination')[0]);
+				self.pageCount = Math.floor((hotelInfoModel.reviewsTotalCount + consts.REVIEWS_PER_PAGE - 1)/consts.REVIEWS_PER_PAGE);
+				ko.applyBindings(self, $('#reviews_pagination')[0]);
 			});
 		};
+		var getSelectedPage = function(){
+			return this.selectedPageNumber();
+		};
+		var setSelectedPage = function(pageNum){
+			if(pageNum == this.selectedPageNumber()){
+				return;
+			}
+			pubSub.publish(eventsList.reviews_page_change, {
+				'key': 'pageNumber',
+				'newValue': pageNum
+			});
+			this.selectedPageNumber(pageNum);
+		};
+		var pageNumbers = function(){
+			return _.range(1, this.pageCount + 1);
+		};
 		return {
+			getSelectedPage: getSelectedPage,
+			setSelectedPage: setSelectedPage,
+			pageNumbers: pageNumbers,
 			init: init
 		};
 	})();
 	
 	ns.PaginationModule = PaginationModule;
-})(app.modules, app.repository, $, app.factories, app.constants);
+})(app.modules, app.repository, $, app.factories, app.constants, app.extensions.getPubSubRef(), app.eventsList);
 
 // Sorting Module for reviews
 (function(ns, repo, $, factories, consts, pubSub, eventsList){
