@@ -81,19 +81,12 @@
 	//				  It defaults to zero.
 	// options.take - how many reviews to return if they exist. 
 	//				  It defaults to app.constants.REVIEWS_PER_PAGE
-	// options.sortByScore - whether to sort by score or not. 
-	//				  It defaults to app.constants.INITIAL_REVIEWS_SORT
 	var getReviews = function(hotelId, options){
-		console.log(new Date());
-		console.log('API GetReviews called with\nhotelId: ' + hotelId + '\noptions: ' + JSON.stringify(options));
 		if(!options.take){
 			options.take = app.constants.REVIEWS_PER_PAGE;
 		}
 		if(!options.skip){
 			options.skip = 0;
-		}
-		if(!options.sortByScore){
-			options.sortByScore = app.constants.INITIAL_REVIEWS_SORT;
 		}
 
 		// mocked API response

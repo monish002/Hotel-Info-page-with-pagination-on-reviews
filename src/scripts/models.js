@@ -1,5 +1,5 @@
 
-// Room view model
+// Room model
 (function(ns){
 	var Room = function(room){
 		var keys = ['name', 'occupancy', 'price', 'currencySymbol', 'availableRoomCount'];
@@ -18,7 +18,7 @@
 	ns.Room = Room;
 })(app.models);
 
-// Review view model
+// Review model
 (function(ns, _){
 	function Review(review){
 		var keys = ['score', 'content', 'cite'];
@@ -112,3 +112,49 @@
 	})();
 
 })(app.models, app.repository, app.models, app.factories, app.constants);
+
+// Pagination model
+(function(ns, _, factories, models, pubSub, eventsList){
+	function Pagination(pageCount){
+		this.selectedPageNumber = ko.observable(1); // initial page selected is 1
+		this.pageCount = pageCount;
+	};
+	
+	Pagination.prototype = (function(){
+		var getSelectedPage = function(){
+			return this.selectedPageNumber();
+		};
+		var setSelectedPage = function(pageNum){
+			if(pageNum == this.selectedPageNumber()){
+				return;
+			}
+			pubSub.publish(eventsList.reviews_page_change, {
+				'key': 'pageNumber',
+				'newValue': pageNum
+			});
+			this.selectedPageNumber(pageNum);
+		};
+		var pageNumbers = function(){
+			return _.range(1, this.pageCount + 1);
+		};
+		return {
+			getSelectedPage: getSelectedPage,
+			setSelectedPage: setSelectedPage,
+			pageNumbers: pageNumbers
+		};
+	})();
+	
+	factories.paginationModel = (function(){
+		var getInstance = function(pageCount){
+			if(!this.pagiModel){
+				this.pagiModel = new models.Pagination(pageCount);
+			}
+			return this.pagiModel;
+		};
+		return {
+			getInstance: getInstance
+		};
+	})();
+	
+	ns.Pagination = Pagination;
+})(app.models, _, app.factories, app.models, app.extensions.getPubSubRef(), app.eventsList);
