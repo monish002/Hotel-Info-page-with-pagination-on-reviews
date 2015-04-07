@@ -55,7 +55,8 @@
 	};
 	
 	// todo: move to proto
-	var updateReviews = function(hotelId, pageNum){
+	// filters: object having keys pageNumber, areReviewsSorted 
+	var updateReviews = function(hotelId, filters){
 		var self = this;
 		repo.getReviews(hotelId, {
 			skip: pageNum * consts.REVIEWS_PER_PAGE,

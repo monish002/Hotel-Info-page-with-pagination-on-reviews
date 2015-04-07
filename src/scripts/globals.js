@@ -12,5 +12,5 @@ app.events = {
 app.constants = {
 	REVIEWS_PER_PAGE: 5,
 	INITIAL_REVIEWS_PAGE_NO: 1,
-	INITIAL_REVIEWS_SORT: false
+	INITIAL_REVIEWS_SORT: true
 };

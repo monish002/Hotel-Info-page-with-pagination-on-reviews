@@ -29,7 +29,7 @@
 })(app.modules, app.repository, $, app.factories);
 
 // reviews module
-(function(ns, repo, $, Review, pubSub, factories, events){
+(function(ns, repo, $, Review, pubSub, factories, events, consts){
 	var ReviewsModule = function(){
 		if(!(this instanceof ReviewsModule)){
 			return new ReviewsModule();
@@ -38,21 +38,30 @@
 		// TODO: get hotelId from URL. 
 		// For now, setting it to 123 as mock hotel id.
 		this.hotelId = 123; 
+		this.areReviewsSorted = consts.INITIAL_REVIEWS_SORT;
+		this.pageNumber = consts.INITIAL_REVIEWS_PAGE_NO;
 	};
 	
 	ReviewsModule.prototype = (function(){
 		var updateReviews = function(event){
-			var hotelId = this.hotelId; 
-			factories.hotelInfo.getInstance(hotelId, function(hotelInfoModel){
-				hotelInfoModel.updateReviews(hotelId, {
-					pageNumber: event.key == 'pageNumber' ? event.newValue : null,
-					areReviewsSorted: event.key == 'areReviewsSorted' ? event.newValue : null
+			this.areReviewsSorted = (event.key == 'areReviewsSorting' ? event.newValue : this.areReviewsSorted);
+			this.pageNumber = (event.key == 'pageNumber' ? event.newValue : this.pageNumber);
+			
+			var self = this;
+			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
+				hotelInfoModel.updateReviews(self.hotelId, {
+					pageNumber: self.pageNumber,
+					areReviewsSorted: self.areReviewsSorted
 				});
 			});
 		};
 		var init = function(){
-			pubSub.subscribe(events.reviews_page_change, updateReviews);
-			pubSub.subscribe(events.sorting_reviews_change, updateReviews);
+			var self = this;
+			var callback = function(event){
+				self.updateReviews(event);
+			};
+			pubSub.subscribe(events.reviews_page_change, callback);
+			pubSub.subscribe(events.sorting_reviews_change, callback);
 
 			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
 				ko.applyBindings(hotelInfoModel, $('#reviews_list')[0]);
@@ -60,12 +69,13 @@
 		};
 
 		return {
-			init: init
+			init: init,
+			updateReviews: updateReviews
 		};
 	})();
 	
 	ns.ReviewsModule = ReviewsModule;
-})(app.modules, app.repository, $, app.models.Review, app.extensions.getPubSubRef(), app.factories, app.events);
+})(app.modules, app.repository, $, app.models.Review, app.extensions.getPubSubRef(), app.factories, app.events, app.constants);
 
 // Pagination module
 (function(ns, repo, $, factories, consts){
@@ -101,7 +111,7 @@
 			return new ReviewsSortModule();
 		}
 		
-		this.areReviewsSorting = false;
+		this.areReviewsSorting = consts.INITIAL_REVIEWS_SORT;
 		this.sortElem = $('#reviews_sorting');
 	};
 
@@ -119,6 +129,7 @@
 		},
 		init = function(){
 			var self = this;
+			this.sortElem.prop('checked', consts.INITIAL_REVIEWS_SORT);
 			this.sortElem.on('change', function(){
 				self.onChangeSortedBy();
 			});
