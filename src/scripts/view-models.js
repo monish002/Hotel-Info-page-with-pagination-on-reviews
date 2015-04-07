@@ -29,7 +29,7 @@
 })(app.modules, app.repository, $, app.factories);
 
 // reviews module
-(function(ns, repo, $, Review, pubSub, factories, events, consts){
+(function(ns, repo, $, Review, pubSub, factories, eventsList, consts){
 	var ReviewsModule = function(){
 		if(!(this instanceof ReviewsModule)){
 			return new ReviewsModule();
@@ -60,8 +60,8 @@
 			var callback = function(event){
 				self.updateReviews(event);
 			};
-			pubSub.subscribe(events.reviews_page_change, callback);
-			pubSub.subscribe(events.sorting_reviews_change, callback);
+			pubSub.subscribe(eventsList.reviews_page_change, callback);
+			pubSub.subscribe(eventsList.sorting_reviews_change, callback);
 
 			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
 				ko.applyBindings(hotelInfoModel, $('#reviews_list')[0]);
@@ -75,7 +75,7 @@
 	})();
 	
 	ns.ReviewsModule = ReviewsModule;
-})(app.modules, app.repository, $, app.models.Review, app.extensions.getPubSubRef(), app.factories, app.events, app.constants);
+})(app.modules, app.repository, $, app.models.Review, app.extensions.getPubSubRef(), app.factories, app.eventsList, app.constants);
 
 // Pagination module
 (function(ns, repo, $, factories, consts){
@@ -105,7 +105,7 @@
 })(app.modules, app.repository, $, app.factories, app.constants);
 
 // Sorting Module for reviews
-(function(ns, repo, $, factories, consts, pubSub, events){
+(function(ns, repo, $, factories, consts, pubSub, eventsList){
 	var ReviewsSortModule = function(){
 		if(!(this instanceof ReviewsSortModule)){
 			return new ReviewsSortModule();
@@ -121,7 +121,7 @@
 			if(this.areReviewsSorting == newValue){
 				return;
 			}
-			pubSub.publish(events.sorting_reviews_change, {
+			pubSub.publish(eventsList.sorting_reviews_change, {
 				'key': 'areReviewsSorting',
 				'newValue': newValue
 			});
@@ -142,5 +142,5 @@
 	})();
 		
 	ns.ReviewsSortModule = ReviewsSortModule;
-})(app.modules, app.repository, $, app.factories, app.constants, app.extensions.getPubSubRef(), app.events);
+})(app.modules, app.repository, $, app.factories, app.constants, app.extensions.getPubSubRef(), app.eventsList);
 

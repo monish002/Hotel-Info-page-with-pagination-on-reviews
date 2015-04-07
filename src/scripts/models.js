@@ -59,8 +59,9 @@
 	var updateReviews = function(hotelId, filters){
 		var self = this;
 		repo.getReviews(hotelId, {
-			skip: pageNum * consts.REVIEWS_PER_PAGE,
-			take: consts.REVIEWS_PER_PAGE
+			skip: filters.pageNumber * consts.REVIEWS_PER_PAGE,
+			take: consts.REVIEWS_PER_PAGE,
+			sortByScore: filters.areReviewsSorted
 		}).then(
 			// success callback
 			function(rawReviews){
@@ -113,7 +114,7 @@
 })(app.models, app.repository, app.models, app.factories, app.constants);
 
 // Pagination model
-(function(ns, _, factories, models, pubSub, events){
+(function(ns, _, factories, models, pubSub, eventsList){
 	function Pagination(pageCount){
 		this.selectedPageNumber = ko.observable(1); // initial page selected is 1
 		this.pageCount = pageCount;
@@ -127,7 +128,7 @@
 			if(pageNum == this.selectedPageNumber()){
 				return;
 			}
-			pubSub.publish(events.reviews_page_change, {
+			pubSub.publish(eventsList.reviews_page_change, {
 				'key': 'pageNumber',
 				'newValue': pageNum
 			});
@@ -156,4 +157,4 @@
 	})();
 	
 	ns.Pagination = Pagination;
-})(app.models, _, app.factories, app.models, app.extensions.getPubSubRef(), app.events);
+})(app.models, _, app.factories, app.models, app.extensions.getPubSubRef(), app.eventsList);

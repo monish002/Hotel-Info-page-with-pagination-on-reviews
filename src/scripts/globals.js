@@ -5,7 +5,7 @@ app.models = app.models || {}; // Models like hotelInfo, Room, Reivew etc.
 app.factories = app.factories || {}; // In this piece of code, factories are used to create model instances.
 app.modules = app.modules || {}; // Modules are identified as components that have DOM to manage in UI. Example: hotelInfo, Reviews, Pagination.
 app.extensions = app.extensions || {}; // Extensions are utility components like PubSub module, Logging module, exception handling module etc.
-app.events = {
+app.eventsList = {
 	reviews_page_change: 'reviews_page_change',
 	sorting_reviews_change: 'sorting_reviews_change'
 };
