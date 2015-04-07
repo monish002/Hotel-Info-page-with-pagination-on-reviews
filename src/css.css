@@ -19,7 +19,7 @@ body {
 	width: 960px;
 }
 
-section {
+section, nav {
 	margin: 0 0 20px 0;
 	clear: both;
 }
@@ -113,6 +113,28 @@ h2 {
 .review_content cite {
 	display: block;
 	margin-top: 5px;
+}
+
+
+/* pagination */
+.pagination{
+	text-align: center;
+}
+
+.page_number{
+	padding: 1px 7px;
+	margin: 3px 2px 0;
+}
+
+.page_number:hover{
+	text-decoration:underline;
+}
+
+.selected_page{
+	font-weight: bold;
+	background-color: #003580;
+	color: white;
+	border-radius: 4px;
 }
 
 /* rooms table */
@@ -211,4 +233,13 @@ h2 {
 .facilities li:before {
 	content: '✔ ';
 	color: #0896ff;
+}
+
+.clear_both{
+	clear: both;
+}
+
+.sort_by_section{
+	float:right;
+	margin: -20px 0 10px;
 }

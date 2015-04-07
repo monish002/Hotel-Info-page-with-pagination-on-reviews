@@ -1,17 +1,24 @@
 var app = app || {};
 app.models = app.models || {}; // Models like hotelInfo, Room, Reivew etc.
+
+// TODO factory.create('PubSub', 'implV1');
 app.factories = app.factories || {}; // In this piece of code, factories are used to create model instances.
 app.modules = app.modules || {}; // Modules are identified as components that have DOM to manage in UI. Example: hotelInfo, Reviews, Pagination.
 app.extensions = app.extensions || {}; // Extensions are utility components like PubSub module, Logging module, exception handling module etc.
+app.events = {
+	reviews_page_change: 'reviews_page_change',
+	sorting_reviews_change: 'sorting_reviews_change'
+};
 app.constants = {
 	reviewBlockSize: 5
 };
 
 // scripts to run on document ready
 $(function(){
-	app.modules.hotelInfoModule.init();
-	app.modules.reviewsModule.init();
-	app.modules.paginationModule.init();
+	app.modules.HotelInfoModule().init();
+	app.modules.ReviewsModule().init();
+	app.modules.PaginationModule().init();
+	app.modules.ReviewsSortModule().init();
 });
 
 // PubSub module to publish and subscribe events.
@@ -22,19 +29,19 @@ $(function(){
 	var PubSub = function(){};
 	
 	PubSub.prototype = (function(){
-		var register = {};
+		var eventsRegister = {};
 		function subscribe(eventName, callback, context){
-			if(!$.isArray(register.eventName)){
-				register.eventName = [];
+			if(!$.isArray(eventsRegister.eventName)){
+				eventsRegister.eventName = [];
 			}
-			register.eventName.push({
+			eventsRegister.eventName.push({
 				callback: callback,
 				context: context
 			});
 		}
 		function publish(eventName, data){
-			if($.isArray(register.eventName)){
-				_.each(register.eventName, function(elem){
+			if($.isArray(eventsRegister.eventName)){
+				_.each(eventsRegister.eventName, function(elem){
 					global.setTimeout(function(){
 						elem.callback.apply(elem.context, [data]);
 					}, 0);
@@ -276,9 +283,9 @@ $(function(){
 })(app.models, app.repository, app.models, app.factories, app.constants);
 
 // Pagination model
-(function(ns, _, factories, models, extensions){
+(function(ns, _, factories, models, extensions, events){
 	function Pagination(pageCount){
-		this.selectedPageNumber = ko.observable(1);
+		this.selectedPageNumber = ko.observable(1); // initial page selected is 1
 		this.pageCount = pageCount;
 	};
 	
@@ -287,8 +294,12 @@ $(function(){
 			return this.selectedPageNumber();
 		};
 		var setSelectedPage = function(pageNum){
-			extensions.pubSub.publish('reviews_page_change', {
-				newValue: pageNum
+			if(pageNum == this.selectedPageNumber()){
+				return;
+			}
+			extensions.pubSub.publish(events.reviews_page_change, {
+				'key': 'pageNumber',
+				'newValue': pageNum
 			});
 			this.selectedPageNumber(pageNum);
 		};
@@ -315,69 +326,140 @@ $(function(){
 	})();
 	
 	ns.Pagination = Pagination;
-})(app.models, _, app.factories, app.models, app.extensions);
+})(app.models, _, app.factories, app.models, app.extensions, app.events);
 
 // Hotel info module to manage hotel related content (this exclues reviews)
 (function(ns, repo, $, factories){
-	var init = function(){
-
+	var HotelInfoModule = function(){
+		// if new operator is not called, force it.
+		if(!(this instanceof HotelInfoModule)){
+			return new HotelInfoModule();
+		}
+	
 		// TODO: get hotelId from URL. 
 		// For now, setting it to 123 as mock hotel id.
-		var hotelId = 123; 
-
-		factories.hotelInfo.getInstance(hotelId, function(hotelInfoModel){
-			ko.applyBindings(hotelInfoModel, $('#hotelInfo')[0]);
-			ko.applyBindings(hotelInfoModel, $('#pageTitle')[0]);
-		});
-	};
+		this.hotelId = 123; 
+	}
 	
-	ns.hotelInfoModule = {
-		init: init
-	};
+	HotelInfoModule.prototype = (function(){
+		var init = function(){
+			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
+				ko.applyBindings(hotelInfoModel, $('#hotelInfo')[0]);
+				ko.applyBindings(hotelInfoModel, $('#pageTitle')[0]);
+			});
+		};
+
+		return {
+			init: init
+		};
+	})();
+	
+	
+	ns.HotelInfoModule = HotelInfoModule;
 })(app.modules, app.repository, $, app.factories);
 
 // reviews module
-(function(ns, repo, $, Review, pubSub, factories){
-	var updateReviews = function(pageNumbers){
+(function(ns, repo, $, Review, pubSub, factories, events){
+	var ReviewsModule = function(){
+		if(!(this instanceof ReviewsModule)){
+			return new ReviewsModule();
+		}
 
 		// TODO: get hotelId from URL. 
 		// For now, setting it to 123 as mock hotel id.
-		var hotelId = 123; 
-
-		factories.hotelInfo.getInstance(hotelId, function(hotelInfoModel){
-			hotelInfoModel.updateReviews(hotelId, pageNumbers.newValue);
-		});
-	};
-	var init = function(){
-		pubSub.subscribe('reviews_page_change', updateReviews);
-
-		// TODO: get hotelId from URL. 
-		// For now, setting it to 123 as mock hotel id.
-		var hotelId = 123; 
-
-		factories.hotelInfo.getInstance(hotelId, function(hotelInfoModel){
-			ko.applyBindings(hotelInfoModel, $('#reviews_section')[0]);
-		});
-	};
-	ns.reviewsModule = {
-		init: init
-	};
-})(app.modules, app.repository, $, app.models.Review, app.extensions.pubSub, app.factories);
-
-// pagination module
-(function(ns, repo, $, factories, consts){
-	var init = function(){
-		// TODO: get hotelId from URL. 
-		// For now, setting it to 123 as mock hotel id.
-		var hotelId = 123; 
-
-		factories.hotelInfo.getInstance(hotelId, function(hotelInfoModel){
-			var pageCount = Math.floor((hotelInfoModel.reviewsTotalCount + consts.reviewBlockSize - 1)/consts.reviewBlockSize);
-			ko.applyBindings(factories.paginationModel.getInstance(pageCount), $('#reviews_pagination')[0]);
-		});
+		this.hotelId = 123; 
 	};
 	
-	ns.paginationModule = {
-		init: init
+	ReviewsModule.prototype = (function(){
+		var updateReviews = function(event){
+			var hotelId = this.hotelId; 
+			factories.hotelInfo.getInstance(hotelId, function(hotelInfoModel){
+				hotelInfoModel.updateReviews(hotelId, {
+					pageNumber: event.key == 'pageNumber' ? event.newValue : null,
+					areReviewsSorted: event.key == 'areReviewsSorted' ? event.newValue : null
+				});
+			});
+		};
+		var init = function(){
+			pubSub.subscribe(events.reviews_page_change, updateReviews);
+			pubSub.subscribe(events.sorting_reviews_change, updateReviews);
+
+			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
+				ko.applyBindings(hotelInfoModel, $('#reviews_list')[0]);
+			});
+		};
+
+		return {
+			init: init
+		};
+	})();
+	
+	ns.ReviewsModule = ReviewsModule;
+})(app.modules, app.repository, $, app.models.Review, app.extensions.pubSub, app.factories, app.events);
+
+// Pagination module
+(function(ns, repo, $, factories, consts){
+	var PaginationModule = function(){
+		if(!(this instanceof PaginationModule)){
+			return new PaginationModule();
+		}
+		
+		// TODO: get hotelId from URL. 
+		// For now, setting it to 123 as mock hotel id.
+		this.hotelId = 123; 
 	};
+	
+	PaginationModule.prototype = (function(){
+		var init = function(){
+			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
+				var pageCount = Math.floor((hotelInfoModel.reviewsTotalCount + consts.reviewBlockSize - 1)/consts.reviewBlockSize);
+				ko.applyBindings(factories.paginationModel.getInstance(pageCount), $('#reviews_pagination')[0]);
+			});
+		};
+		return {
+			init: init
+		};
+	})();
+	
+	ns.PaginationModule = PaginationModule;
 })(app.modules, app.repository, $, app.factories, app.constants);
+
+// Sorting Module for reviews
+(function(ns, repo, $, factories, consts, extensions, events){
+	var ReviewsSortModule = function(){
+		if(!(this instanceof ReviewsSortModule)){
+			return new ReviewsSortModule();
+		}
+		
+		this.areReviewsSorting = false;
+		this.sortElem = $('#reviews_sorting');
+	};
+
+	ReviewsSortModule.prototype = (function(){
+		var onChangeSortedBy = function(){
+			var newValue = this.sortElem.is(":checked");
+			if(this.areReviewsSorting == newValue){
+				return;
+			}
+			extensions.pubSub.publish(events.sorting_reviews_change, {
+				'key': 'areReviewsSorting',
+				'newValue': newValue
+			});
+			this.areReviewsSorting = newValue;
+		},
+		init = function(){
+			var self = this;
+			this.sortElem.on('change', function(){
+				self.onChangeSortedBy();
+			});
+		};
+
+		return {
+			init: init,
+			onChangeSortedBy: onChangeSortedBy
+		};
+	})();
+		
+	ns.ReviewsSortModule = ReviewsSortModule;
+})(app.modules, app.repository, $, app.factories, app.constants, app.extensions, app.events);
+

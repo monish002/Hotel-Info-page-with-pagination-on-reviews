@@ -82,9 +82,19 @@
 		</div>
 
 		<section class="reviews">
-			<h2>Reviews</h2>
+			<header>
+				<h2>Reviews</h2>
+			</header>
+			
+			<!-- reviews sorting -->
+			<div id="reviews_sorting" class="sort_by_section">
+				<input type="checkbox" value="review_score"/>Sort by review score
+			</div>
+			<div class="clear_both"></div>
+			
+			<!-- reviews list -->
 			<div id="reviews_section">
-				<ul class="reviews_list" data-bind="foreach:reviews()">
+				<ul class="reviews_list" id="reviews_list" data-bind="foreach:reviews()">
 					<li class="one_review">
 						<strong class="review_score" data-bind="text:score"></strong>
 						<blockquote class="review_content" data-bind="html:getReviewHtmlStr()">
@@ -92,13 +102,10 @@
 					</li>	
 				</ul>
 			</div>
-			<nav id="reviews_pagination" data-bind="foreach:pageNumbers()">
-				<!-- ko if:($root.getSelectedPage() != $data) -->
-					<span data-bind="text: $data, click: $root.setSelectedPage.bind($root)"></span>
-				<!-- /ko -->
-				<!-- ko if:($root.getSelectedPage() == $data) -->
-					<span data-bind="text: $data, style: {fontWeight: 'bold'}"></span>
-				<!-- /ko -->
+			
+			<!-- pagination -->
+			<nav class="pagination" id="reviews_pagination" data-bind="foreach:pageNumbers()">
+				<span class="page_number" data-bind="text: $data, css: {'selected_page': $root.getSelectedPage() == $data}, click: $root.setSelectedPage.bind($root)"></span>
 			</nav>
 		</section>
 		
@@ -109,6 +116,12 @@
 		<script src="jquery-1.11.1.min.js"></script>
 		<script src="knockout-3.3.0.min.js"></script>
 		<script src="underscore-1.8.3.min.js"></script>
+		
 		<script src="js.js"></script>
+		<!-- <script src="models.js"></script> -->
+		<!-- <script src="pub-sub-mediator.js"></script> -->
+		<!-- <script src="repository.js"></script> -->
+		<!-- <script src="view-models.js"></script> -->
+		<script src="on-document-load.js"></script>
 	</body>
 </html>
