@@ -87,8 +87,8 @@
 			</header>
 			
 			<!-- reviews sorting -->
-			<div id="reviews_sorting" class="sort_by_section">
-				<input type="checkbox" value="review_score"/>Sort by review score
+			<div class="sort_by_section">
+				<input id="reviews_sorting" type="checkbox" value="review_score"/>Sort by review score
 			</div>
 			<div class="clear_both"></div>
 			
@@ -116,12 +116,15 @@
 		<script src="jquery-1.11.1.min.js"></script>
 		<script src="knockout-3.3.0.min.js"></script>
 		<script src="underscore-1.8.3.min.js"></script>
-		
+
 		<script src="js.js"></script>
-		<!-- <script src="models.js"></script> -->
-		<!-- <script src="pub-sub-mediator.js"></script> -->
-		<!-- <script src="repository.js"></script> -->
-		<!-- <script src="view-models.js"></script> -->
-		<script src="on-document-load.js"></script>
+		
+		<script src="scripts/globals.js"></script>
+		<script src="scripts/pub-sub-mediator.js"></script>
+		<script src="scripts/repository.js"></script>
+		
+		<script src="scripts/models.js"></script>
+		<script src="scripts/view-models.js"></script>
+		<script src="scripts/on-document-load.js"></script>
 	</body>
 </html>
