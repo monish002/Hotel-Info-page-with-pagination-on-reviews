@@ -21,8 +21,9 @@
 // Review view model
 (function(ns, _){
 	function Review(review){
-		var keys = ['score', 'content', 'cite'];
-		_.extend(this, _.chain(review).pick(keys).value());
+		this.score = review.score;
+		this.content = review.content;
+		this.cite = review.cite;
 	};
 	
 	Review.prototype = (function(){
@@ -41,41 +42,49 @@
 // Hotel info model
 (function(ns, repo, models, factories, consts){
 	var HotelInfoModel = function(hotelInfo){
-		var keys = ['basicHotelInfo', 'description', 'photos', 'facilities', 'reviewsTotalCount'];
-		_.extend(this, _.chain(hotelInfo).pick(keys).value());
+		this.basicHotelInfo = hotelInfo.basicHotelInfo;
+		this.description = hotelInfo.description;
+		this.photos = hotelInfo.photos;
+		this.facilities = hotelInfo.facilities;
 	
-		this.rooms = !$.isArray(hotelInfo.rooms) ? [] : _.map(hotelInfo.rooms, function(rawRoom){
+		this.rooms = !$.isArray(hotelInfo.rooms) ? [] : $.map(hotelInfo.rooms, function(rawRoom){
 			return new models.Room(rawRoom);
 		});
+
+		this.allReviews = $.isArray(hotelInfo.reviews) ? hotelInfo.reviews : [];
+		this.reviews = ko.observableArray();
 		
-		var reviews = !$.isArray(hotelInfo.reviews) ? [] : _.map(hotelInfo.reviews, function(rawReview){
-			return new models.Review(rawReview);
-		});
-		this.reviews = ko.observableArray(reviews);
+		if($.isArray(hotelInfo.reviews) && hotelInfo.reviews.length){
+			var pageOneReviewCount = Math.min(this.allReviews.length, consts.REVIEWS_PER_PAGE),
+			pageOneRawReviews = this.allReviews.slice(0, pageOneReviewCount),
+			pageOneReviews = $.map(pageOneRawReviews, function(rawReview){
+				return new models.Review(rawReview);
+			});
+			this.reviews(pageOneReviews);
+		}
 	};
 	
 	// todo: move to proto
 	// filters: object having keys pageNumber, areReviewsSorted 
 	var updateReviews = function(hotelId, filters){
-		var self = this;
-		repo.getReviews(hotelId, {
-			skip: filters.pageNumber * consts.REVIEWS_PER_PAGE,
-			take: consts.REVIEWS_PER_PAGE,
-			sortByScore: filters.areReviewsSorted
-		}).then(
-			// success callback
-			function(rawReviews){
-				var reviews = !$.isArray(rawReviews) ? [] : _.map(rawReviews, function(rawReview){
-					return new models.Review(rawReview);
-				});
-				self.reviews(reviews); // Make reviewsPage class and add set(pageContents)
-			},
-			// error callback
-			function(){ 
-				throw "API call failed";
-				// Log the error with details in server side.
-				// Show appropriate error to user
+		if(!this.allReviews){
+			return;
+		}
+		
+		var reviews = this.allReviews.slice(0); // make a copy of all reviews
+		if(filters.areReviewsSorted){
+			reviews.sort(function(r1, r2){
+				return r1.score - r2.score;
 			});
+		}
+	
+		var skipReviews = (filters.pageNumber-1) * consts.REVIEWS_PER_PAGE;
+		var takeReviews = consts.REVIEWS_PER_PAGE;
+		var newRawReviews = reviews.slice(skipReviews, skipReviews+takeReviews);
+		var newReviews = $.map(newRawReviews, function(rawReview){
+			return new models.Review(rawReview);
+		});
+		this.reviews(newReviews);
 	};
 	
 	HotelInfoModel.prototype = (function(){

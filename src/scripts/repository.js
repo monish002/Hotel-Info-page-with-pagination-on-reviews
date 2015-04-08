@@ -55,11 +55,47 @@
 				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
 				cite: 'Malcolm Reynolds'
 			},{
-				score: 5,
+				score: 4,
 				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
 				cite: 'Malcolm Reynolds'
 			},{
-				score: 5,
+				score: 3,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 1,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 4,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 3,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 1,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 4,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 3,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 1,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 4,
+				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
+				cite: 'Malcolm Reynolds'
+			},{
+				score: 3,
 				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
 				cite: 'Malcolm Reynolds'
 			},{
@@ -70,50 +106,11 @@
 				score: 8,
 				content: 'Duis ac nisi id lorem rhoncus tempus eu sit amet nisi. Aenean ultrices congue ligula, ac molestie velit ultricies a. Nulla ac nunc et nisi placerat interdum sit amet ut erat. Integer vulputate nulla id orci cursus, eget ullamcorper justo ultricies. Nulla lorem dui, euismod non porttitor eu, sagittis in lacus. In suscipit lectus non viverra luctus. Pellentesque egestas, dolor at luctus eleifend, velit dui viverra risus, ac rutrum sapien ante at massa. Donec imperdiet consequat laoreet.',
 				cite: 'Zoe Washburne'
-			}],
-			reviewsTotalCount: 25
+			}]
 		});
 	};
-	
-	// makes an API call to get reviews
-	// hotelId - hotelId for which review are to be fetched
-	// options.skip - how many reviews to skip.
-	//				  It defaults to zero.
-	// options.take - how many reviews to return if they exist. 
-	//				  It defaults to app.constants.REVIEWS_PER_PAGE
-	// options.sortByScore - whether to sort by score or not. 
-	//				  It defaults to app.constants.INITIAL_REVIEWS_SORT
-	var getReviews = function(hotelId, options){
-		console.log(new Date());
-		console.log('API GetReviews called with\nhotelId: ' + hotelId + '\noptions: ' + JSON.stringify(options));
-		if(!options.take){
-			options.take = app.constants.REVIEWS_PER_PAGE;
-		}
-		if(!options.skip){
-			options.skip = 0;
-		}
-		if(!options.sortByScore){
-			options.sortByScore = app.constants.INITIAL_REVIEWS_SORT;
-		}
-
-		// mocked API response
-		var stubReview = function(){
-			return {
-				score: Math.floor(Math.random()),
-				content: 'Pellentesque ligula nibh, lacinia eget pharetra ut, vulputate vitae odio. Donec non mattis nisi. Pellentesque elit leo, tincidunt nec felis vitae, aliquet imperdiet purus. In elit ante, vestibulum non accumsan at, volutpat eget dolor. Quisque ut tincidunt elit. Curabitur rutrum dignissim enim ac aliquet. Curabitur et aliquam nisl.',
-				cite: 'Malcolm Reynolds'
-			};
-		};
-
-		var stubbedReviews = [];
-		_.each(new Array(options.take), function(){
-			stubbedReviews.push(stubReview());
-		});
-		return $.when(stubbedReviews);
-	};
-	
+		
 	ns.repository = {
-		getHotelInfo: getHotelInfo,
-		getReviews: getReviews
+		getHotelInfo: getHotelInfo
 	};
 })(app, $);

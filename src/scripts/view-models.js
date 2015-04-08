@@ -96,7 +96,8 @@
 		var init = function(){
 			var self = this;
 			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
-				self.pageCount = Math.floor((hotelInfoModel.reviewsTotalCount + consts.REVIEWS_PER_PAGE - 1)/consts.REVIEWS_PER_PAGE);
+				var totalReviewCount = hotelInfoModel.allReviews.length;
+				self.pageCount = Math.floor((totalReviewCount + consts.REVIEWS_PER_PAGE - 1)/consts.REVIEWS_PER_PAGE);
 				ko.applyBindings(self, $('#reviews_pagination')[0]);
 			});
 		};
