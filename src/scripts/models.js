@@ -1,14 +1,17 @@
 
 // Room view model
-(function(ns){
+(function(ns, utils){
 	var Room = function(room){
-		var keys = ['name', 'occupancy', 'price', 'currencySymbol', 'availableRoomCount'];
-		_.extend(this, _.chain(room).pick(keys).value());
+		this.name = room.name;
+		this.occupancy = room.occupancy;
+		this.price = room.price;
+		this.currencySymbol = room.currencySymbol;
+		this.availableRoomCount = room.availableRoomCount;
 	};
 	
 	Room.prototype = (function(){
 		var getNumRoomsOptions = function(){
-			return _.range(this.availableRoomCount + 1);
+			return utils.range(0, this.availableRoomCount);
 		};
 		return {
 			getNumRoomsOptions: getNumRoomsOptions
@@ -16,10 +19,10 @@
 	})();
 	
 	ns.Room = Room;
-})(app.models);
+})(app.models, app.utils);
 
 // Review view model
-(function(ns, _){
+(function(ns){
 	function Review(review){
 		this.score = review.score;
 		this.content = review.content;
@@ -37,7 +40,7 @@
 	})();
 	
 	ns.Review = Review;
-})(app.models, _);
+})(app.models);
 
 // Hotel info model
 (function(ns, repo, models, consts){

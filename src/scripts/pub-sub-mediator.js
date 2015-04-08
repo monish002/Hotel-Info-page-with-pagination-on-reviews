@@ -31,7 +31,7 @@
 		function publish(eventName, data){
 			console.log('Event published: ' + eventName + '\nData: ' + JSON.stringify(data).substr(0, 80) + '. . .');
 			if($.isArray(this.eventsRegister[eventName])){
-				_.each(this.eventsRegister[eventName], function(elem){
+				$.each(this.eventsRegister[eventName], function(index, elem){
 					global.setTimeout(function(){
 						elem.callback.apply(elem.context, [data]);
 					}, 0);

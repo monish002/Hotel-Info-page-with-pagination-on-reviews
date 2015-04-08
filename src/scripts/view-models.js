@@ -112,7 +112,7 @@
 })(app.modules, app.repository, $, app.extensions.getPubSubRef(), app.models, app.eventsList, app.constants);
 
 // Pagination module
-(function(ns, repo, $, consts, pubSub, eventsList){
+(function(ns, repo, $, consts, pubSub, eventsList, utils){
 	var PaginationModule = function(){
 		if(!(this instanceof PaginationModule)){
 			return new PaginationModule();
@@ -149,7 +149,7 @@
 			this.selectedPageNumber(pageNum);
 		};
 		var pageNumbers = function(){
-			return _.range(1, this.pageCount + 1);
+			return utils.range(1, this.pageCount);
 		};
 		return {
 			getSelectedPage: getSelectedPage,
@@ -160,7 +160,7 @@
 	})();
 	
 	ns.PaginationModule = PaginationModule;
-})(app.modules, app.repository, $, app.constants, app.extensions.getPubSubRef(), app.eventsList);
+})(app.modules, app.repository, $, app.constants, app.extensions.getPubSubRef(), app.eventsList, app.utils);
 
 // Sorting Module for reviews
 (function(ns, repo, $, consts, pubSub, eventsList){
