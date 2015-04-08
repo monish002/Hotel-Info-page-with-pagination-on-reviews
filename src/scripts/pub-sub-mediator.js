@@ -20,18 +20,18 @@
 		// pub sub implementation
 		function subscribe(eventName, callback, context){
 			console.log('Event subscribed: ' + eventName + '\nData: ' + JSON.stringify(context));
-			if(!$.isArray(this.eventsRegister.eventName)){
-				this.eventsRegister.eventName = [];
+			if(!$.isArray(this.eventsRegister[eventName])){
+				this.eventsRegister[eventName] = [];
 			}
-			this.eventsRegister.eventName.push({
+			this.eventsRegister[eventName].push({
 				callback: callback,
 				context: context
 			});
 		}
 		function publish(eventName, data){
-			console.log('Event published: ' + eventName + '\nData: ' + JSON.stringify(data));
-			if($.isArray(this.eventsRegister.eventName)){
-				_.each(this.eventsRegister.eventName, function(elem){
+			console.log('Event published: ' + eventName + '\nData: ' + JSON.stringify(data).substr(0, 80) + '. . .');
+			if($.isArray(this.eventsRegister[eventName])){
+				_.each(this.eventsRegister[eventName], function(elem){
 					global.setTimeout(function(){
 						elem.callback.apply(elem.context, [data]);
 					}, 0);
@@ -45,5 +45,5 @@
 	})();
 	
 	ns.PubSub = PubSub;
-	ns.getPubSubRef = getPubSubRef;
+	ns.getPubSubRef = getPubSubRef; // Singleton
 })(app.extensions, window);

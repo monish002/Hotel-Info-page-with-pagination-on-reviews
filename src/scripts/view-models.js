@@ -1,22 +1,37 @@
 // Hotel info module to manage hotel related content (this exclues reviews)
-(function(ns, repo, $, factories){
+(function(ns, repo, $, models, pubSub, eventsList){
 	var HotelInfoModule = function(){
 		// if new operator is not called, force it.
 		if(!(this instanceof HotelInfoModule)){
 			return new HotelInfoModule();
 		}
 	
-		// TODO: get hotelId from URL. 
-		// For now, setting it to 123 as mock hotel id.
-		this.hotelId = 123; 
+		this.hotelModel = null;
 	}
 	
 	HotelInfoModule.prototype = (function(){
 		var init = function(){
-			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
-				ko.applyBindings(hotelInfoModel, $('#hotelInfo')[0]);
-				ko.applyBindings(hotelInfoModel, $('#pageTitle')[0]);
-			});
+			// Get hotelId from URL. 
+			// For now, setting it to 123 as mock hotel id.
+			var hotelId = 123; 
+			repo.getHotelInfo(hotelId).then(
+				// success callback
+				function(rawHotelInfoModel){
+					var hotelModel = new models.HotelInfoModel(rawHotelInfoModel);
+					pubSub.publish(eventsList.hotel_info_loaded, {
+						'key': 'hotelModel',
+						'newValue': hotelModel
+					});
+					ko.applyBindings(hotelModel, $('#hotelInfo')[0]);
+					ko.applyBindings(hotelModel, $('#pageTitle')[0]);
+				},
+				// error callback
+				function(){ 
+					throw "API call failed";
+					// Log the error with details in server side.
+					// Show appropriate error to user
+				}
+			);
 		};
 
 		return {
@@ -24,12 +39,11 @@
 		};
 	})();
 	
-	
 	ns.HotelInfoModule = HotelInfoModule;
-})(app.modules, app.repository, $, app.factories);
+})(app.modules, app.repository, $, app.models, app.extensions.getPubSubRef(), app.eventsList);
 
 // reviews module
-(function(ns, repo, $, Review, pubSub, factories, eventsList, consts){
+(function(ns, repo, $, pubSub, models, eventsList, consts){
 	var ReviewsModule = function(){
 		if(!(this instanceof ReviewsModule)){
 			return new ReviewsModule();
@@ -40,20 +54,34 @@
 		this.hotelId = 123; 
 		this.areReviewsSorted = consts.INITIAL_REVIEWS_SORT;
 		this.pageNumber = consts.INITIAL_REVIEWS_PAGE_NO;
+		this.allReviews = null; // init in init function
+		this.reviews = ko.observableArray(); // used for view
 	};
 	
 	ReviewsModule.prototype = (function(){
 		var updateReviews = function(event){
-			this.areReviewsSorted = (event.key == 'areReviewsSorting' ? event.newValue : this.areReviewsSorted);
-			this.pageNumber = (event.key == 'pageNumber' ? event.newValue : this.pageNumber);
-			
 			var self = this;
-			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
-				hotelInfoModel.updateReviews(self.hotelId, {
-					pageNumber: self.pageNumber,
-					areReviewsSorted: self.areReviewsSorted
+			if(!this.allReviews || this.allReviews.length <= 0){
+				return;
+			}
+			
+			this.areReviewsSorted = (event && event.key == 'areReviewsSorting' ? event.newValue : this.areReviewsSorted);
+			this.pageNumber = (event && event.key == 'pageNumber' ? event.newValue : this.pageNumber);
+			
+			var reviews = this.allReviews.slice(0); // make a copy of all reviews
+			if(this.areReviewsSorted){
+				reviews.sort(function(r1, r2){
+					return r2.score - r1.score; // desc order
 				});
+			}
+		
+			var skipReviews = (this.pageNumber-1) * consts.REVIEWS_PER_PAGE;
+			var takeReviews = consts.REVIEWS_PER_PAGE;
+			var newRawReviews = reviews.slice(skipReviews, skipReviews+takeReviews);
+			var newReviews = $.map(newRawReviews, function(rawReview){
+				return new models.Review(rawReview);
 			});
+			this.reviews(newReviews);
 		};
 		var init = function(){
 			var self = this;
@@ -63,8 +91,14 @@
 			pubSub.subscribe(eventsList.reviews_page_change, callback);
 			pubSub.subscribe(eventsList.sorting_reviews_change, callback);
 
-			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
-				ko.applyBindings(hotelInfoModel, $('#reviews_list')[0]);
+			pubSub.subscribe(eventsList.hotel_info_loaded, function(event){
+				var hotelModel = event.key == 'hotelModel' ? event.newValue : null;
+				if(!hotelModel){
+					throw "hotelModel should have some values";
+				}
+				self.allReviews = hotelModel.allReviews;
+				ko.applyBindings({reviews: self.reviews}, $('#reviews_list')[0]);
+				self.updateReviews();
 			});
 		};
 
@@ -75,10 +109,10 @@
 	})();
 	
 	ns.ReviewsModule = ReviewsModule;
-})(app.modules, app.repository, $, app.models.Review, app.extensions.getPubSubRef(), app.factories, app.eventsList, app.constants);
+})(app.modules, app.repository, $, app.extensions.getPubSubRef(), app.models, app.eventsList, app.constants);
 
 // Pagination module
-(function(ns, repo, $, factories, consts, pubSub, eventsList){
+(function(ns, repo, $, consts, pubSub, eventsList){
 	var PaginationModule = function(){
 		if(!(this instanceof PaginationModule)){
 			return new PaginationModule();
@@ -86,16 +120,16 @@
 		
 		this.selectedPageNumber = ko.observable(consts.INITIAL_REVIEWS_PAGE_NO);
 		this.pageCount = null; // will be set in the init()
-		
-		// TODO: get hotelId from URL. 
-		// For now, setting it to 123 as mock hotel id.
-		this.hotelId = 123;	
 	};
 	
 	PaginationModule.prototype = (function(){
 		var init = function(){
 			var self = this;
-			factories.hotelInfo.getInstance(this.hotelId, function(hotelInfoModel){
+			pubSub.subscribe(eventsList.hotel_info_loaded, function(event){
+				var hotelInfoModel = event.key == 'hotelModel' ? event.newValue : null;
+				if(!hotelInfoModel){
+					throw "hotelInfoModel should have some values";
+				}
 				var totalReviewCount = hotelInfoModel.allReviews.length;
 				self.pageCount = Math.floor((totalReviewCount + consts.REVIEWS_PER_PAGE - 1)/consts.REVIEWS_PER_PAGE);
 				ko.applyBindings(self, $('#reviews_pagination')[0]);
@@ -126,10 +160,10 @@
 	})();
 	
 	ns.PaginationModule = PaginationModule;
-})(app.modules, app.repository, $, app.factories, app.constants, app.extensions.getPubSubRef(), app.eventsList);
+})(app.modules, app.repository, $, app.constants, app.extensions.getPubSubRef(), app.eventsList);
 
 // Sorting Module for reviews
-(function(ns, repo, $, factories, consts, pubSub, eventsList){
+(function(ns, repo, $, consts, pubSub, eventsList){
 	var ReviewsSortModule = function(){
 		if(!(this instanceof ReviewsSortModule)){
 			return new ReviewsSortModule();
@@ -166,5 +200,5 @@
 	})();
 		
 	ns.ReviewsSortModule = ReviewsSortModule;
-})(app.modules, app.repository, $, app.factories, app.constants, app.extensions.getPubSubRef(), app.eventsList);
+})(app.modules, app.repository, $, app.constants, app.extensions.getPubSubRef(), app.eventsList);
 
