@@ -1,3 +1,4 @@
+@@ -0,0 +1,214 @@
 header, nav, section, article, aside, footer {
    display: block;
 }
@@ -19,7 +20,7 @@ body {
 	width: 960px;
 }
 
-section, nav {
+section {
 	margin: 0 0 20px 0;
 	clear: both;
 }
@@ -113,28 +114,6 @@ h2 {
 .review_content cite {
 	display: block;
 	margin-top: 5px;
-}
-
-
-/* pagination */
-.pagination{
-	text-align: center;
-}
-
-.page_number{
-	padding: 1px 7px;
-	margin: 3px 2px 0;
-}
-
-.page_number:hover{
-	text-decoration:underline;
-}
-
-.selected_page{
-	font-weight: bold;
-	background-color: #003580;
-	color: white;
-	border-radius: 4px;
 }
 
 /* rooms table */
@@ -235,11 +214,40 @@ h2 {
 	color: #0896ff;
 }
 
-.clear_both{
+/* More styles added for pagination and sort reviews components */
+nav {
+	margin: 0 0 20px 0;
 	clear: both;
 }
 
+/* pagination */
+.pagination{
+	text-align: center;
+	display: block;
+}
+
+.page_number{
+	padding: 1px 7px;
+	margin: 3px 2px 0;
+}
+
+.page_number:hover{
+	text-decoration:underline;
+}
+
+.selected_page{
+	font-weight: bold;
+	background-color: #003580;
+	color: white;
+	border-radius: 4px;
+}
+
+/*sort reviews*/
 .sort_by_section{
 	float:right;
 	margin: -20px 0 10px;
+}
+
+.clear_both{
+	clear: both;
 }
