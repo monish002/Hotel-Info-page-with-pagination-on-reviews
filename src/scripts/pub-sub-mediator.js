@@ -19,7 +19,7 @@
 	PubSub.prototype = (function(){
 		// pub sub implementation
 		function subscribe(eventName, callback, context){
-			console.log('Event subscribed: ' + eventName + '\nData: ' + JSON.stringify(context));
+			//console.log('Event subscribed: ' + eventName + '\nData: ' + JSON.stringify(context));
 			if(!$.isArray(this.eventsRegister[eventName])){
 				this.eventsRegister[eventName] = [];
 			}
@@ -29,7 +29,7 @@
 			});
 		}
 		function publish(eventName, data){
-			console.log('Event published: ' + eventName + '\nData: ' + JSON.stringify(data).substr(0, 80) + '. . .');
+			//console.log('Event published: ' + eventName + '\nData: ' + JSON.stringify(data).substr(0, 80) + '. . .');
 			if($.isArray(this.eventsRegister[eventName])){
 				$.each(this.eventsRegister[eventName], function(index, elem){
 					global.setTimeout(function(){
