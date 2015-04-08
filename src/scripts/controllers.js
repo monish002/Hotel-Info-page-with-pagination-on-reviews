@@ -1,20 +1,20 @@
-// Hotel info module to manage hotel related content (this exclues reviews)
-(function(ns, repo, $, models, pubSub, eventsList){
-	var HotelInfoModule = function(){
+// Hotel info controller to manage hotel related content (this exclues reviews)
+(function(ns, dataService, $, models, pubSub, eventsList){
+	var HotelInfoController = function(){
 		// if new operator is not called, force it.
-		if(!(this instanceof HotelInfoModule)){
-			return new HotelInfoModule();
+		if(!(this instanceof HotelInfoController)){
+			return new HotelInfoController();
 		}
 	
 		this.hotelModel = null;
 	}
 	
-	HotelInfoModule.prototype = (function(){
+	HotelInfoController.prototype = (function(){
 		var init = function(){
 			// Get hotelId from URL. 
 			// For now, setting it to 123 as mock hotel id.
 			var hotelId = 123; 
-			repo.getHotelInfo(hotelId).then(
+			dataService.getHotelInfo(hotelId).then(
 				// success callback
 				function(rawHotelInfoModel){
 					var hotelModel = new models.HotelInfoModel(rawHotelInfoModel);
@@ -39,14 +39,14 @@
 		};
 	})();
 	
-	ns.HotelInfoModule = HotelInfoModule;
-})(app.modules, app.repository, $, app.models, app.extensions.getPubSubRef(), app.eventsList);
+	ns.HotelInfoController = HotelInfoController;
+})(app.controllers, app.dataService, $, app.models, app.extensions.getPubSubRef(), app.eventsList);
 
-// reviews module
-(function(ns, repo, $, pubSub, models, eventsList, consts){
-	var ReviewsModule = function(){
-		if(!(this instanceof ReviewsModule)){
-			return new ReviewsModule();
+// reviews controller
+(function(ns, $, pubSub, models, eventsList, consts){
+	var ReviewsController = function(){
+		if(!(this instanceof ReviewsController)){
+			return new ReviewsController();
 		}
 
 		// TODO: get hotelId from URL. 
@@ -58,7 +58,7 @@
 		this.reviews = ko.observableArray(); // used for view
 	};
 	
-	ReviewsModule.prototype = (function(){
+	ReviewsController.prototype = (function(){
 		var updateReviews = function(event){
 			var self = this;
 			if(!this.allReviews || this.allReviews.length <= 0){
@@ -108,21 +108,21 @@
 		};
 	})();
 	
-	ns.ReviewsModule = ReviewsModule;
-})(app.modules, app.repository, $, app.extensions.getPubSubRef(), app.models, app.eventsList, app.constants);
+	ns.ReviewsController = ReviewsController;
+})(app.controllers, $, app.extensions.getPubSubRef(), app.models, app.eventsList, app.constants);
 
-// Pagination module
-(function(ns, repo, $, consts, pubSub, eventsList, utils){
-	var PaginationModule = function(){
-		if(!(this instanceof PaginationModule)){
-			return new PaginationModule();
+// Pagination controller
+(function(ns, $, consts, pubSub, eventsList, utils){
+	var PaginationController = function(){
+		if(!(this instanceof PaginationController)){
+			return new PaginationController();
 		}
 		
 		this.selectedPageNumber = ko.observable(consts.INITIAL_REVIEWS_PAGE_NO);
 		this.pageCount = null; // will be set in the init()
 	};
 	
-	PaginationModule.prototype = (function(){
+	PaginationController.prototype = (function(){
 		var init = function(){
 			var self = this;
 			pubSub.subscribe(eventsList.hotel_info_loaded, function(event){
@@ -159,21 +159,21 @@
 		};
 	})();
 	
-	ns.PaginationModule = PaginationModule;
-})(app.modules, app.repository, $, app.constants, app.extensions.getPubSubRef(), app.eventsList, app.utils);
+	ns.PaginationController = PaginationController;
+})(app.controllers, $, app.constants, app.extensions.getPubSubRef(), app.eventsList, app.utils);
 
-// Sorting Module for reviews
-(function(ns, repo, $, consts, pubSub, eventsList){
-	var ReviewsSortModule = function(){
-		if(!(this instanceof ReviewsSortModule)){
-			return new ReviewsSortModule();
+// Sorting Controller for reviews
+(function(ns, $, consts, pubSub, eventsList){
+	var ReviewsSortController = function(){
+		if(!(this instanceof ReviewsSortController)){
+			return new ReviewsSortController();
 		}
 		
 		this.areReviewsSorting = consts.INITIAL_REVIEWS_SORT;
 		this.sortElem = $('#reviews_sorting');
 	};
 
-	ReviewsSortModule.prototype = (function(){
+	ReviewsSortController.prototype = (function(){
 		var onChangeSortedBy = function(){
 			var newValue = this.sortElem.is(":checked");
 			if(this.areReviewsSorting == newValue){
@@ -199,6 +199,6 @@
 		};
 	})();
 		
-	ns.ReviewsSortModule = ReviewsSortModule;
-})(app.modules, app.repository, $, app.constants, app.extensions.getPubSubRef(), app.eventsList);
+	ns.ReviewsSortController = ReviewsSortController;
+})(app.controllers, $, app.constants, app.extensions.getPubSubRef(), app.eventsList);
 

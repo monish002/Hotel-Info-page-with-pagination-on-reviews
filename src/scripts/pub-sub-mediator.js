@@ -1,6 +1,6 @@
 // PubSub module to publish and subscribe events.
-// This is used for modules - ReviewsModule and PaginationModule.
-// PaginationModule publishes an event whenever user clicks on another page number.
+// This is used for controllers - ReviewsController and PaginationController.
+// PaginationController publishes an event whenever user clicks on another page number.
 (function(ns, global){
 
 	var PubSub = function(){
@@ -44,6 +44,5 @@
 		};
 	})();
 	
-	ns.PubSub = PubSub;
 	ns.getPubSubRef = getPubSubRef; // Singleton
 })(app.extensions, window);

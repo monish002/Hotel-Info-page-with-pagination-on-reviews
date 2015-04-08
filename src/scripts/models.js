@@ -43,7 +43,7 @@
 })(app.models);
 
 // Hotel info model
-(function(ns, repo, models, consts){
+(function(ns, models, consts){
 	var HotelInfoModel = function(hotelInfo){
 		this.basicHotelInfo = hotelInfo.basicHotelInfo;
 		this.description = hotelInfo.description;
@@ -64,4 +64,4 @@
 
 	ns.HotelInfoModel = HotelInfoModel;
 
-})(app.models, app.repository, app.models, app.constants);
+})(app.models, app.models, app.constants);

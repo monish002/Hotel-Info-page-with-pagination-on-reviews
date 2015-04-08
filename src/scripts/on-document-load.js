@@ -1,7 +1,7 @@
 // scripts to run on document ready
 $(function(){
-	app.modules.ReviewsModule().init();
-	app.modules.PaginationModule().init();
-	app.modules.ReviewsSortModule().init();
-	app.modules.HotelInfoModule().init();
+	app.controllers.ReviewsController().init();
+	app.controllers.PaginationController().init();
+	app.controllers.ReviewsSortController().init();
+	app.controllers.HotelInfoController().init();
 });

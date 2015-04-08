@@ -110,7 +110,7 @@
 		});
 	};
 		
-	ns.repository = {
+	ns.dataService = {
 		getHotelInfo: getHotelInfo
 	};
 })(app, $);
