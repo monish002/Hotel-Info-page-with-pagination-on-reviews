@@ -7,8 +7,19 @@
 		}
 	
 		this.hotelModel = null;
-	}
+	};
 	
+	var _publishDataLoadedEvent = function(hotelModel){
+		pubSub.publish(eventsList.hotel_info_loaded, {
+			'key': 'hotelModel',
+			'newValue': hotelModel
+		});
+	};
+	var _renderData = function(hotelModel){
+		ko.applyBindings(hotelModel, $('#pageTitle')[0]);
+		ko.applyBindings(hotelModel, $('#hotelInfo')[0]);
+	};
+
 	HotelInfoController.prototype = (function(){
 		var init = function(){
 			// Get hotelId from URL. 
@@ -18,12 +29,8 @@
 				// success callback
 				function(rawHotelInfoModel){
 					var hotelModel = new models.HotelInfoModel(rawHotelInfoModel);
-					pubSub.publish(eventsList.hotel_info_loaded, {
-						'key': 'hotelModel',
-						'newValue': hotelModel
-					});
-					ko.applyBindings(hotelModel, $('#hotelInfo')[0]);
-					ko.applyBindings(hotelModel, $('#pageTitle')[0]);
+					_publishDataLoadedEvent(hotelModel);
+					_renderData(hotelModel);
 				},
 				// error callback
 				function(){ 
@@ -58,9 +65,36 @@
 		this.reviews = ko.observableArray(); // used for view
 	};
 	
+	var _sortReviews = function(reviews, areReviewsSorted){
+		if(areReviewsSorted){
+			reviews.sort(function(r1, r2){
+				return r2.score - r1.score; // desc order
+			});
+		}
+		return reviews;
+	};
+	
+	var _paginateReviews = function(reviews, pageNumber){
+		var skipReviews = (pageNumber-1) * consts.REVIEWS_PER_PAGE,
+		    takeReviews = consts.REVIEWS_PER_PAGE,
+		    newRawReviews = reviews.slice(skipReviews, skipReviews+takeReviews),
+		    newReviews = $.map(newRawReviews, function(rawReview){
+			return new models.Review(rawReview);
+		});
+		return newReviews;
+	};
+	
+	_initializeAllReviews = function(event, self){
+		var hotelModel = event.key == 'hotelModel' ? event.newValue : null;
+		if(!hotelModel){
+			throw "hotelModel should have some values";
+		}
+		self.allReviews = hotelModel.allReviews;
+		self.updateReviews();
+	};
+	
 	ReviewsController.prototype = (function(){
 		var updateReviews = function(event){
-			var self = this;
 			if(!this.allReviews || this.allReviews.length <= 0){
 				return;
 			}
@@ -68,20 +102,11 @@
 			this.areReviewsSorted = (event && event.key == 'areReviewsSorting' ? event.newValue : this.areReviewsSorted);
 			this.pageNumber = (event && event.key == 'pageNumber' ? event.newValue : this.pageNumber);
 			
-			var reviews = this.allReviews.slice(0); // make a copy of all reviews
-			if(this.areReviewsSorted){
-				reviews.sort(function(r1, r2){
-					return r2.score - r1.score; // desc order
-				});
-			}
-		
-			var skipReviews = (this.pageNumber-1) * consts.REVIEWS_PER_PAGE;
-			var takeReviews = consts.REVIEWS_PER_PAGE;
-			var newRawReviews = reviews.slice(skipReviews, skipReviews+takeReviews);
-			var newReviews = $.map(newRawReviews, function(rawReview){
-				return new models.Review(rawReview);
-			});
-			this.reviews(newReviews);
+			var copyOfReviews = this.allReviews.slice(0), // make a copy of all reviews
+				sortedAllReviews = _sortReviews(copyOfReviews, this.areReviewsSorted),
+				pageReviews = _paginateReviews(sortedAllReviews, this.pageNumber);
+			
+			this.reviews(pageReviews);
 		};
 		var init = function(){
 			var self = this;
@@ -92,13 +117,8 @@
 			pubSub.subscribe(eventsList.sorting_reviews_change, callback);
 
 			pubSub.subscribe(eventsList.hotel_info_loaded, function(event){
-				var hotelModel = event.key == 'hotelModel' ? event.newValue : null;
-				if(!hotelModel){
-					throw "hotelModel should have some values";
-				}
-				self.allReviews = hotelModel.allReviews;
+				_initializeAllReviews(event, self);
 				ko.applyBindings({reviews: self.reviews}, $('#reviews_list')[0]);
-				self.updateReviews();
 			});
 		};
 
@@ -122,17 +142,21 @@
 		this.pageCount = null; // will be set in the init()
 	};
 	
+	var _initPageCountAndApplyBinding = function(event, self){
+		var hotelInfoModel = event.key == 'hotelModel' ? event.newValue : null;
+		if(!hotelInfoModel){
+			throw "hotelInfoModel should have some values";
+		}
+		var totalReviewCount = hotelInfoModel.allReviews.length;
+		self.pageCount = Math.floor((totalReviewCount + consts.REVIEWS_PER_PAGE - 1)/consts.REVIEWS_PER_PAGE);
+		ko.applyBindings(self, $('#reviews_pagination')[0]);
+	};
+	
 	PaginationController.prototype = (function(){
 		var init = function(){
 			var self = this;
 			pubSub.subscribe(eventsList.hotel_info_loaded, function(event){
-				var hotelInfoModel = event.key == 'hotelModel' ? event.newValue : null;
-				if(!hotelInfoModel){
-					throw "hotelInfoModel should have some values";
-				}
-				var totalReviewCount = hotelInfoModel.allReviews.length;
-				self.pageCount = Math.floor((totalReviewCount + consts.REVIEWS_PER_PAGE - 1)/consts.REVIEWS_PER_PAGE);
-				ko.applyBindings(self, $('#reviews_pagination')[0]);
+				_initPageCountAndApplyBinding(event, self);
 			});
 		};
 		var getSelectedPage = function(){
